@@ -2,23 +2,13 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import { Configuration, OpenAIApi } from 'openai';
-import fs from 'fs';
 import multer from 'multer';
-import path from 'path';
+import {Readable} from 'stream';
 import dotenv from 'dotenv';
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const originalExtension = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + uniqueSuffix + originalExtension);
-  },
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({ storage: storage });
 const configuration = new Configuration({
@@ -46,13 +36,13 @@ app.get('/', (_req, res) => {
 
 // Handle POST requests to /api/record
 app.post('/api/record', upload.single('audioData'), async (req, res) => {
-  // TODO: you shouldn't save the file. Just use the buffer. Make change.
-  const filePath = req.file.path;
+  const buffer = req.file.buffer;
+  const audioStream = Readable.from(buffer);
+  audioStream.path = req.file.originalname;
   let transcript;
   try {
     transcript = await openai.createTranscription(
-      // you can also use buffer instad of file path
-      fs.createReadStream(filePath),
+      audioStream,
       'whisper-1',
       '',
       'json',
