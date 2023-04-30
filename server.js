@@ -1,11 +1,10 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import { Configuration, OpenAIApi } from 'openai';
-import multer from 'multer';
-import {Readable} from 'stream';
-import dotenv from 'dotenv';
-dotenv.config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { Configuration, OpenAIApi } = require('openai');
+const multer = require('multer');
+const { Readable } = require('stream');
+require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
 const storage = multer.memoryStorage();
@@ -18,8 +17,8 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 const app = express();
-
 app.use(cors());
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -83,3 +82,5 @@ app.use('*',(_req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}.`);
 });
+
+module.exports = app;
