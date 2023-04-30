@@ -39,6 +39,11 @@ app.use((req, _res, next) => {
   next();
 });
 
+app.get('/', (_req, res) => {
+  res.send('Hello World!');
+});
+
+
 // Handle POST requests to /api/record
 app.post('/api/record', upload.single('audioData'), async (req, res) => {
   // TODO: you shouldn't save the file. Just use the buffer. Make change.
@@ -77,6 +82,13 @@ app.post('/api/complete', async (req, res) => {
   }
   res.json({ response: response.data.choices[0].message.content });
 });
+
+// return 404 if no route is matched
+app.use('*',(_req, res) => {
+  res.status(404).send('404 Not Found');
+});
+
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}.`);
